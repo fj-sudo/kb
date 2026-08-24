@@ -1,37 +1,51 @@
-from kb.import_process import ImportGraphState
+# atguigu/import_process/base.py
+
 from abc import ABC, abstractmethod
 
-from kb.tool.logger import logger
+from atguigu.import_process.state import ImportGraphState
+from atguigu.tool.logger import logger
+
+"""
+查询流程节点基类
+定义统一的节点接口规范，提供通用功能
+"""
 
 
-# 规定 接口 让所有的子类必须重写process  不能实例化
-# 抽离所有节点类的公共部分
 class NodeBase(ABC):
-    name = (
-        "node_base"  # 后期拿所有节点名称，如果某个节点没写名称，默认拿到的就是node_base
-    )
+    name: str = "node_base"  # 节点名称，子类应覆盖
 
     def __init__(self):
+        """
+        强制子类设置 name
+        """
         if self.name == "node_base":
-            logger.error(
-                f"{self.__class__.__name__}类没有设置name属性，请在子类中重写该属性"
-            )
-            raise Exception(
-                f"{self.__class__.__name__}类没有设置name属性，请在子类中重写该属性"
-            )
+            raise ValueError(f"子类 {self.__class__.__name__} 必须覆盖 name 类属性")
 
-    def __call__(self, state: ImportGraphState):
-        # 统一的打印日志，统一的处理异常
+    def __call__(self, state: ImportGraphState) -> ImportGraphState:
+        """
+        节点执行入口
+        """
         try:
-            logger.info(f"开始执行节点")
-            self.process(state)
-            logger.info(f"结束执行节点")
+            # 1. 开始准备执行节点
+            logger.info(f"--- {self.name} 开始啦 ---")
+
+            # 2. 执行节点
+            result = self.process(state)
+
+            # 3. 执行节点成功
+            logger.info(f"--- {self.name} 完成啦 ---")
+
+            return result
+
         except Exception as e:
-            logger.error(f"执行节点{self.name}时发生异常")
-            raise e
+            logger.error(f"{self.name} 执行失败: {e}")
+            raise
 
     @abstractmethod
-    def process(self, state: ImportGraphState):
-        pass
-
-
+    def process(self, state: ImportGraphState) -> ImportGraphState:
+        """
+        节点核心处理逻辑
+        子类必须实现此方法
+        :param state: 工作流状态对象
+        :return: 更新后的状态对象
+        """
