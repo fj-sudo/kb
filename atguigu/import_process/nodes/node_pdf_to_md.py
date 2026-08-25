@@ -81,8 +81,9 @@ class NodePDFToMD(NodeBase):
         end_time = 0
         while True:
             try:
-                res = requests.get(url, headers=header)
                 star_time = time.time()
+                res = requests.get(url, headers=header)
+
                 if res.status_code != 200:
                     logger.error("获取文件路径请求失败")
                     raise Exception("获取文件路径请求失败")
