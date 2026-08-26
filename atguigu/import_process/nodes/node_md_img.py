@@ -41,9 +41,9 @@ class NodeMDImg(NodeBase):
     def get_llm_content(self, image_dict_list: list[Any]):
         llm = init_chat_model(
             "openai:qwen3-vl-flash",
-            base_url=LoadLLM.OPENAI_API_BASE,
-            api_key=LoadLLM.OPENAI_API_KEY,
-            temperature=LoadLLM.LLM_DEFAULT_TEMPERATURE
+            base_url=LoadLLM.openai_api_base,
+            api_key=LoadLLM.openai_api_key,
+            temperature=LoadLLM.llm_default_temperature
         )
 
         llm_dict_list = []
