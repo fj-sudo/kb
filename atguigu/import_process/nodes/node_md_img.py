@@ -4,18 +4,18 @@ import os
 import re
 import time
 from collections import deque
-from logging import info
 from pathlib import Path
 from typing import Any
 
 from langchain.chat_models import init_chat_model
-from openai import base_url, api_key
+from minio.deleteobjects import DeleteObject
 
-from atguigu.config.congif import LoadLLM
+from atguigu.config.congif import LoadLLM, LoadMinio
 from atguigu.import_process.base import NodeBase
 from atguigu.import_process.state import ImportGraphState
 from atguigu.tool.json_format import json_format
 from atguigu.tool.logger import logger
+from atguigu.tool.minio_client import get_minio_client
 
 
 class NodeMDImg(NodeBase):
@@ -28,15 +28,69 @@ class NodeMDImg(NodeBase):
     def process(self, state: ImportGraphState):
         image_dir, image_dir_obj, md_content = self.check_data(state)
         if not image_dir_obj.exists():
-            return  {
-                "md_content":md_content
+            return {
+                "md_content": md_content
             }
         if not os.listdir(image_dir):
             return {
                 "md_content": md_content
             }
         image_dict_list = self.get_context(image_dir, md_content)
-        self.get_llm_content(image_dict_list)
+        llm_dict_list = self.get_llm_content(image_dict_list)
+
+        md_path_obj, url_with_context_dict_list = self.put_miniourl(llm_dict_list, state)
+        # 获得url替换md中的摘要和图片地址
+        for i in url_with_context_dict_list:
+            url = i["url"]
+            summary = i["summary"]
+
+            pattern = re.compile(r"!\[.*?\]\(.*?" + re.escape(i["image_name"]) + r"\)")
+            md_content = pattern.sub(
+                lambda _: f"![{summary}]({url})",
+                md_content
+            )
+        new_md_path = md_path_obj.parent / f"{md_path_obj.stem}_new.md"
+        with open(new_md_path, "w", encoding="utf-8") as f:
+            f.write(md_content)
+        return {
+            "md_content":md_content,
+            "md_path":str(new_md_path)
+        }
+    def put_miniourl(self, llm_dict_list: list[Any], state: ImportGraphState) -> tuple[list[Any], Path]:
+        # 幂等性删除
+
+        md_path_obj = Path(state["md_path"])
+        md_title = md_path_obj.stem
+        bucket_name = LoadMinio.minio_bucket_name
+        client = get_minio_client()
+        objects = client.list_objects(f"{bucket_name}", recursive=True, prefix=md_title)
+        delete_objects = [DeleteObject(i.object_name) for i in objects]
+
+        errors = client.remove_objects(
+            bucket_name,
+            delete_objects,
+        )
+        for error in errors:
+            print("error occurred when deleting object", error)
+        url_with_context_dict_list = []
+        # 上传图片url
+        for i in llm_dict_list:
+            image_path_obj = Path(i["image_path"])
+            minio_object_path = f"{md_title}" + "/" + f"{image_path_obj.name}"
+
+            client.fput_object(bucket_name=bucket_name,
+                               object_name=minio_object_path,
+                               file_path=str(image_path_obj))
+
+            minio_object_url = f"http://192.168.10.4:9000/{bucket_name}/{md_title}/{image_path_obj.name}"
+
+            url_with_context_dict_list.append(
+                {
+                    **i,
+                    "url": minio_object_url
+                }
+            )
+        return md_path_obj, url_with_context_dict_list
 
     def get_llm_content(self, image_dict_list: list[Any]):
         llm = init_chat_model(
@@ -84,6 +138,7 @@ class NodeMDImg(NodeBase):
                 "summary": llm_invoke.content
             })
         print(json_format(llm_dict_list))
+        return llm_dict_list
 
     def get_context(self, image_dir: Path, md_content: Path) -> list[Any]:
         image_name_list = os.listdir(image_dir)
