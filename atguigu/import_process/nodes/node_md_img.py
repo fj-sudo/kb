@@ -38,8 +38,16 @@ class NodeMDImg(NodeBase):
         image_dict_list = self.get_context(image_dir, md_content)
         llm_dict_list = self.get_llm_content(image_dict_list)
 
-        md_path_obj, url_with_context_dict_list = self.put_miniourl(llm_dict_list, state)
+        md_path_obj, url_with_context_dict_list = self.put_minio_url(llm_dict_list, state)
         # 获得url替换md中的摘要和图片地址
+        md_content, new_md_path = self.sub_md(md_content, md_path_obj, url_with_context_dict_list)
+        return {
+            "md_content": md_content,
+            "md_path": str(new_md_path)
+        }
+
+    def sub_md(self, md_content: Path, md_path_obj: list[Any], url_with_context_dict_list: Path) -> tuple[
+        str | bytes | Any, Any]:
         for i in url_with_context_dict_list:
             url = i["url"]
             summary = i["summary"]
@@ -52,11 +60,9 @@ class NodeMDImg(NodeBase):
         new_md_path = md_path_obj.parent / f"{md_path_obj.stem}_new.md"
         with open(new_md_path, "w", encoding="utf-8") as f:
             f.write(md_content)
-        return {
-            "md_content":md_content,
-            "md_path":str(new_md_path)
-        }
-    def put_miniourl(self, llm_dict_list: list[Any], state: ImportGraphState) -> tuple[list[Any], Path]:
+        return md_content, new_md_path
+
+    def put_minio_url(self, llm_dict_list: list[Any], state: ImportGraphState) -> tuple[list[Any], Path]:
         # 幂等性删除
 
         md_path_obj = Path(state["md_path"])
