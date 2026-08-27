@@ -5,7 +5,9 @@ from minio import Minio
 from atguigu.config.congif import LoadMinio
 from atguigu.tool.logger import logger
 
-minio_client=None
+minio_client: Minio | None = None
+
+
 def get_minio_client():
     try:
         global minio_client
@@ -15,7 +17,7 @@ def get_minio_client():
                 endpoint=LoadMinio.minio_endpoint,
                 access_key=LoadMinio.minio_access_key,
                 secret_key=LoadMinio.minio_secret_key,
-                secure=False
+                secure=False,
             )
             if not minio_client.bucket_exists(buck_name):
                 minio_client.make_bucket(bucket_name=buck_name)
@@ -36,7 +38,9 @@ def get_minio_client():
                     },
                 ],
             }
-            minio_client.set_bucket_policy(bucket_name=buck_name, policy=json.dumps(policy))
+            minio_client.set_bucket_policy(
+                bucket_name=buck_name, policy=json.dumps(policy)
+            )
         return minio_client
     except:
         logger.error("minio客户端创建失败")

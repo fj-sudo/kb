@@ -16,3 +16,15 @@ dependencies = [
     "python-dotenv>=1.2.3",
     "ruff>=0.16.3",
 ]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.39.10",
+    "ruff>=0.16.3",
+]
+[tool.basedpyright]
+pythonVersion = "3.12"
+typeCheckingMode = "off"
+
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
