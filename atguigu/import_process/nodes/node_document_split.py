@@ -97,7 +97,6 @@ class NodeDocumentSplit(NodeBase):
             title_len = len(first_chunk_dict.get("title")) + 2
             md_content = first_chunk_dict.get("md_content")
             md_content_new = md_content[title_len:] if title != "无标题" else md_content
-
             if len(md_content_new) <= 300:
                 second_chunk_dick_list.append({**first_chunk_dict, "part": 0})
                 continue
