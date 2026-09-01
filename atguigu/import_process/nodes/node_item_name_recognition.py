@@ -117,9 +117,7 @@ class NodeItemNameRecognition(NodeBase):
             "sparse_vector": sparse,
         }
         milvus_client.load_collection(collection_name)
-        item_name2 = (
-            item_name.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
-        )
+        item_name2 = item_name.replace("\\", "\\\\").replace("'", "'").replace('"', '"')
         fil = f"item_name=='{item_name2}'"
         milvus_client.delete(collection_name, filter=fil)
         milvus_client.insert(collection_name=collection_name, data=data)
