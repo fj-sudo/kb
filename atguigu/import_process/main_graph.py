@@ -35,7 +35,7 @@ class MainGraph:
         self.state_graph.set_entry_point(NodeEntry.name)
         self.state_graph.add_conditional_edges(NodeEntry.name, self.edge_route)
 
-        self.state_graph.add_edge(NodePDFToMD.name,NodeMDImg.name)
+        self.state_graph.add_edge(NodePDFToMD.name, NodeMDImg.name)
         self.state_graph.add_edge(NodeMDImg.name, NodeDocumentSplit.name)
         self.state_graph.add_edge(NodeDocumentSplit.name, NodeItemNameRecognition.name)
         self.state_graph.add_edge(NodeItemNameRecognition.name, NodeBGEEmbedding.name)
@@ -60,6 +60,8 @@ class MainGraph:
 
 
 if __name__ == "__main__":
-    state1 = {"local_file_path": r"D:\Software\SGG\资料\视频分发\掌柜智库01\资料\05-设备手册汇总\doc\hak180产品安全手册.pdf"
-              ,"local_dir": r"D:\Software\SGG\资料\视频分发\掌柜智库01\资料\05-设备手册汇总\doc"}
-    print(MainGraph.create_run(state1))
+    state1 = {
+        "local_file_path": r"D:\Software\SGG\资料\视频分发\掌柜智库01\资料\05-设备手册汇总\doc\hak180产品安全手册.pdf",
+        "local_dir": r"D:\Software\SGG\资料\视频分发\掌柜智库01\资料\05-设备手册汇总\doc",
+    }
+    MainGraph.create_run(state1)

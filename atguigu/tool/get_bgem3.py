@@ -24,6 +24,3 @@ def get_embedding(data_list):
         dict(zip(i.indices.tolist(), i.data.tolist())) for i in embedding["sparse"]
     ]
     return {"dense": dense, "sparse": sparse}
-
-
-print(get_embedding(["hello"]))

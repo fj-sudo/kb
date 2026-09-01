@@ -31,7 +31,6 @@ class NodeItemNameRecognition(NodeBase):
         if not file_title:
             raise Exception("文件不能为空")
         # 取前20个chunk给llm，返回item_name
-        print(chunks_list)
         chunks_list1 = chunks_list[:20]
         chunks = "\n"
         for idx, chunk in enumerate(chunks_list1, start=1):
@@ -42,7 +41,6 @@ class NodeItemNameRecognition(NodeBase):
             if len(chunks) > 10000:
                 break
         chunks_str = chunks[:10000]
-        print(chunks_str)
         llm = init_chat_model(
             f"openai:{LoadLLM.vl_model}",
             base_url=LoadLLM.openai_api_base,

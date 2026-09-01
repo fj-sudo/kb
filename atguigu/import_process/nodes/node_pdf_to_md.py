@@ -96,7 +96,6 @@ class NodePDFToMD(NodeBase):
                     logger.error("获取文件路径请求的数据不正确")
                     raise Exception("获取文件路径请求的数据不正确")
                 url = res_json["data"]["extract_result"][0]["full_zip_url"]
-                print(url)
                 break
             except:
                 time.sleep(1)

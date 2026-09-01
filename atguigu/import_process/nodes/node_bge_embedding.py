@@ -16,7 +16,6 @@ class NodeBGEEmbedding(NodeBase):
 
     def process(self, state: ImportGraphState):
         chunks_list = state.get("chunks")
-        print(json_format(chunks_list))
         if not chunks_list:
             raise Exception("文件不能为空")
 
@@ -36,7 +35,6 @@ class NodeBGEEmbedding(NodeBase):
             encoding="utf-8",
         ) as f:
             f.write(json_format(chunks_list))
-        print(json_format(chunks_list))
         return {"chunks": chunks_list}
 
 

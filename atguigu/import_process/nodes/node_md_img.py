@@ -13,7 +13,6 @@ from minio.deleteobjects import DeleteObject
 from atguigu.config.congif import LoadLLM, LoadMinio
 from atguigu.import_process.base import NodeBase
 from atguigu.import_process.state import ImportGraphState
-from atguigu.tool.json_format import json_format
 from atguigu.tool.logger import logger
 from atguigu.tool.minio_client import get_minio_client
 
@@ -145,7 +144,6 @@ class NodeMDImg(NodeBase):
                     "summary": llm_invoke.content,
                 }
             )
-        print(json_format(llm_dict_list))
         return llm_dict_list
 
     def get_context(self, image_dir: Path, md_content: Path) -> list[Any]:
@@ -184,7 +182,6 @@ class NodeMDImg(NodeBase):
                     "image_path": str(image_dir / image_name),
                 }
             )
-        print(json_format(image_dict_list))
         return image_dict_list
 
     def check_data(self, state: ImportGraphState) -> tuple[Path, str, Path]:

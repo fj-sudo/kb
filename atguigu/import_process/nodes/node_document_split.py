@@ -80,7 +80,6 @@ class NodeDocumentSplit(NodeBase):
                 "md_content": "\n".join(md_line_content_list[current_idx:]),
             }
         )
-        print(json_format(first_chunk_dict_list))
         # 3细切：用字符串文本切分器对内容长度大于300的进行切分，列表字典
         # 小于300，内容中有<table跳过。
         second_chunk_dick_list = []
@@ -113,7 +112,6 @@ class NodeDocumentSplit(NodeBase):
                         "md_content": title + "\n\n" + md_chunk_content,
                     }
                 )
-        print(json_format(second_chunk_dick_list))
         with open(
             r"D:\Software\SGG\资料\视频分发\掌柜"
             r"智库01\资料\05-设备手册汇总\doc\hak180产品安全手册\chunks.json",
