@@ -19,11 +19,11 @@ def get_bgem3():
 def get_embedding(data_list):
     bgem = get_bgem3()
     embedding = bgem.encode_documents(data_list)
-    dense = embedding["dense"][0]  # np.ndarray, shape=(1024,)
-    sparse = embedding["sparse"][[0]].tocoo()  # 取第0行转coo
-    sparse_dict = dict(zip(sparse.col.tolist(), sparse.data.tolist()))
-    print(dense)
-    print(sparse_dict)
+    dense = [i.tolist() for i in embedding["dense"]]
+    sparse = [
+        dict(zip(i.indices.tolist(), i.data.tolist())) for i in embedding["sparse"]
+    ]
+    return {"dense": dense, "sparse": sparse}
 
 
-get_embedding(["hello"])
+print(get_embedding(["hello"]))

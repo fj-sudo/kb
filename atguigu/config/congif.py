@@ -31,3 +31,9 @@ class LoadBgem3:
     bge_m3 = os.getenv("BGE_M3")
     bge_device = os.getenv("BGE_DEVICE")
     bge_fp16 = True if os.getenv("BGE_FP16") in ("True", "true", "1") else False
+
+
+class LoadMilvus:
+    milvus_uri = os.getenv("MILVUS_URI")
+    chunks_collection = os.getenv("CHUNKS_COLLECTION")
+    item_name_collection = os.getenv("ITEM_NAME_COLLECTION")
