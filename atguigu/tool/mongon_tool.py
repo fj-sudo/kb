@@ -34,12 +34,20 @@ def clear_history(session_id):
 
 
 # get_recent_messages 根据session_id获取最近的n条消息
-def get_recent_messages(session_id, n):
+def get_recent_messages(session_id, n=10):
     collection = get_mongo_tool()
     res = collection.find({"session_id": session_id}).sort("ts", -1).limit(n)
     #     cursor对象 游标
     return list(res)  # 转成列表
     # return res
+
+
+def update_history_item_names_and_query(ids, item_names=None, rewritten_query=None):
+    collection = get_mongo_tool()
+    collection.update_many(
+        {"_id": {"$in": ids}},
+        {"$set": {"item_names": item_names, "rewritten_query": rewritten_query}},
+    )
 
 
 # add_or_update_history保存历史记录（根据id决定是添加还是修改）
@@ -94,7 +102,6 @@ if __name__ == "__main__":
     # }
     res = add_or_update_history("test111", "user", "gaga")
     print(res, type(res))
-    #
     print(get_recent_messages("test111", 6))
     print(
         add_or_update_history("test111", "user", "gaga", id="a96c2f301903dac88914319")
