@@ -1,8 +1,14 @@
 # atguigu/query_process/nodes/node_search_embedding_hyde.py
+import json
 
+from langchain.chat_models import init_chat_model
+
+from atguigu.config.congif import LoadLLM, LoadMilvus
+from atguigu.config.prompt import HYDE_PROMPT
 from atguigu.query_process.base import NodeBase
 from atguigu.query_process.state import QueryGraphState
-from atguigu.tool.logger import logger
+from atguigu.tool.get_bgem3 import get_embedding
+from atguigu.tool.milvus_client import creat_hybrid_reqs, hybrid_search
 
 
 class NodeSearchEmbeddingHyde(NodeBase):
@@ -15,14 +21,50 @@ class NodeSearchEmbeddingHyde(NodeBase):
     name: str = "node_search_embedding_hyde"
 
     def process(self, state: QueryGraphState):
-        """
-        节点逻辑
-        :param state: 工作流状态对象
-        :return: 更新后的状态对象
-        """
+        rewritten_query, item_names = (
+            state.get("rewritten_query"),
+            state.get("item_names"),
+        )
+        llm = init_chat_model(
+            f"openai:{LoadLLM.llm_default_model}",
+            base_url=LoadLLM.openai_api_base,
+            api_key=LoadLLM.openai_api_key,
+            temperature=LoadLLM.llm_default_temperature,
+        )
+        message = [("user", HYDE_PROMPT.format(rewritten_query=rewritten_query))]
+        llm_res = llm.invoke(message).content
 
-        # TODO
-        logger.info(f"【{self.name}】节点逻辑")
+        embedding = get_embedding([llm_res])
+        dense_list = embedding["dense"][0]
+        sparse_dict_list = embedding["sparse"][0]
 
-        # return state
-        return {"hyde_embedding_chunks": []}
+        expr = f"item_name in {json.dumps(item_names)}"
+
+        reqs = creat_hybrid_reqs(
+            dense_list,
+            sparse_dict_list,
+            "dense_vector",
+            "sparse_vector",
+            expr=expr,
+            dense_param={"metric_type": "L2"},
+        )
+        search = hybrid_search(
+            LoadMilvus.chunks_collection,
+            reqs,
+            output_fields=["id", "title", "file_title", "md_content", "item_name"],
+            ranker=(0.8, 0.2),
+        )
+        temp_list = [
+            {**i["entity"], "source": "local", "score": i.distance} for i in search[0]
+        ]
+        print(temp_list)
+        return {"hyde_embedding_chunks": temp_list}
+
+
+if __name__ == "__main__":
+    init_state = {
+        "rewritten_query": "关于HAK180烫金机如何使用",
+        "item_names": ["HAK180烫金机"],
+    }
+    node_search_embedding_hyde = NodeSearchEmbeddingHyde()
+    result = node_search_embedding_hyde(init_state)

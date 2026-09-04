@@ -1,8 +1,12 @@
 # atguigu/query_process/nodes/node_web_search_mcp.py
+import asyncio
+import json
 
+from agents.mcp import MCPServerStreamableHttp
+
+from atguigu.config.congif import LoadMcp
 from atguigu.query_process.base import NodeBase
 from atguigu.query_process.state import QueryGraphState
-from atguigu.tool.logger import logger
 
 
 class NodeWebSearchMcp(NodeBase):
@@ -14,14 +18,45 @@ class NodeWebSearchMcp(NodeBase):
     name: str = "node_web_search_mcp"
 
     def process(self, state: QueryGraphState):
-        """
-        节点逻辑
-        :param state: 工作流状态对象
-        :return: 更新后的状态对象
-        """
+        rewritten_query, item_names = (
+            state.get("rewritten_query"),
+            state.get("item_names"),
+        )
+        result = asyncio.run(self.main(rewritten_query))
+        res = json.loads(result.content[0].text)["pages"]
+        chunks = [
+            {
+                "content": item.get("snippet"),
+                "title": item.get("title"),
+                "url": item.get("url"),
+                "source": "web",
+            }
+            for item in res
+        ]
+        return {"web_search_docs": chunks}
 
-        # TODO
-        logger.info(f"【{self.name}】节点逻辑")
+    async def main(self, rewritten_query) -> None:
+        token = LoadMcp.api_key
+        async with MCPServerStreamableHttp(
+            name="Streamable HTTP Python Server",
+            params={
+                "url": LoadMcp.mcp_base_url,
+                "headers": {"Authorization": f"Bearer {token}"},
+                "timeout": 10,
+            },
+            cache_tools_list=True,
+            max_retry_attempts=3,
+        ) as server:
+            res = await server.call_tool(
+                "bailian_web_search", {"query": rewritten_query, "count": 10}
+            )
+            return res
 
-        # return state
-        return {"web_search_docs": []}
+
+if __name__ == "__main__":
+    init_state = {
+        "rewritten_query": "关于HAK180烫金机如何使用",
+        "item_names": ["HAK180烫金机"],
+    }
+    node_search_embedding_hyde = NodeWebSearchMcp()
+    result = node_search_embedding_hyde(init_state)
