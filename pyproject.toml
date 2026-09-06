@@ -24,6 +24,7 @@ dependencies = [
     "pymilvus[model]>=3.0.1",
     "openai-agents<2",
     "mcp<2",
+    "dashscope>=1.27.4",
 ]
 
 [dependency-groups]

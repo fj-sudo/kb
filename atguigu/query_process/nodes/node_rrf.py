@@ -2,6 +2,7 @@
 
 from atguigu.query_process.base import NodeBase
 from atguigu.query_process.state import QueryGraphState
+from atguigu.tool.json_format import json_format
 
 
 class NodeRrf(NodeBase):
@@ -33,6 +34,8 @@ class NodeRrf(NodeBase):
         chunks = sorted(temp_dict.values(), key=lambda x: x["score"], reverse=1)[
             : len(embedding_chunks)
         ]
+        print(json_format(chunks))
+
         return {"rrf_chunks": chunks}
 
 

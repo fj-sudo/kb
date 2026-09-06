@@ -7,6 +7,7 @@ from agents.mcp import MCPServerStreamableHttp
 from atguigu.config.congif import LoadMcp
 from atguigu.query_process.base import NodeBase
 from atguigu.query_process.state import QueryGraphState
+from atguigu.tool.json_format import json_format
 
 
 class NodeWebSearchMcp(NodeBase):
@@ -33,6 +34,7 @@ class NodeWebSearchMcp(NodeBase):
             }
             for item in res
         ]
+        print(json_format(chunks))
         return {"web_search_docs": chunks}
 
     async def main(self, rewritten_query) -> None:
@@ -50,6 +52,7 @@ class NodeWebSearchMcp(NodeBase):
             res = await server.call_tool(
                 "bailian_web_search", {"query": rewritten_query, "count": 10}
             )
+
             return res
 
 
