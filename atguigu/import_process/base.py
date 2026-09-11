@@ -1,9 +1,10 @@
 # atguigu/import_process/base.py
-
+import time
 from abc import ABC, abstractmethod
 
 from atguigu.import_process.state import ImportGraphState
 from atguigu.tool.logger import logger
+from atguigu.tool.task_utils import add_done_task, add_node_duration, add_running_task
 
 """
 查询流程节点基类
@@ -30,9 +31,12 @@ class NodeBase(ABC):
             logger.info(f"--- {self.name} 开始啦 ---")
 
             # 2. 执行节点
+            start = time.time()
+            add_running_task(state["task_id"], self.name)
             result = self.process(state)
-
+            add_done_task(state["task_id"], self.name)
             # 3. 执行节点成功
+            add_node_duration(state["task_id"], self.name, time.time() - start)
             logger.info(f"--- {self.name} 完成啦 ---")
 
             return result

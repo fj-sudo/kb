@@ -10,6 +10,12 @@ from abc import ABC, abstractmethod
 
 from atguigu.query_process.state import QueryGraphState
 from atguigu.tool.logger import logger
+from atguigu.tool.task_utils import (
+    add_done_task,
+    add_running_task,
+    get_task_info,
+    put_q,
+)
 
 
 class NodeBase(ABC):
@@ -27,9 +33,16 @@ class NodeBase(ABC):
         节点执行入口
         """
         try:
+            task_id = state.get("task_id")
             logger.info(f"{self.name} 开始执行...")
 
+            add_running_task(task_id, self.name)
+            print(1)
+            put_q(task_id, "progress", get_task_info(task_id))
+            print(1)
             result = self.process(state)
+            add_done_task(task_id, self.name)
+            put_q(task_id, "progress", get_task_info(task_id))
 
             logger.info(f"{self.name} 结束执行...")
 

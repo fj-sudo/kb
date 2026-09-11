@@ -73,13 +73,18 @@ class NodeItemNameConfirm(NodeBase):
                 .replace("~~~", "")
             )
         print(llm_res)
-        llm_data_dict = json.loads(llm_res)
-        item_names = llm_data_dict["item_names"]
+        try:
+            llm_data_dict = json.loads(llm_res)
+            item_names = llm_data_dict["item_names"]
+
+            rewritten_query = llm_data_dict["rewritten_query"]
+        except:
+            item_names = []
+            rewritten_query = original_query
+        query_list = []
         item_names1_list = [
             i.replace("\n", "").replace("\t", "").replace(" ", "") for i in item_names
         ]
-        rewritten_query = llm_data_dict["rewritten_query"]
-        query_list = []
         for data in item_names1_list:
             embeddings = get_embedding([data])
             dense = embeddings.get("dense")[0]
@@ -134,10 +139,10 @@ class NodeItemNameConfirm(NodeBase):
 if __name__ == "__main__":
     # 模拟会话历史
     session_id = "test_001"
-    add_or_update_history(session_id, "user", "咨询下烫金机。")
-    add_or_update_history(session_id, "assistant", "您好。请问是哪个型号")
-    add_or_update_history(session_id, "user", "hak180")
-    add_or_update_history(session_id, "assistant", "具体有什么问题呢？")
+    # add_or_update_history(session_id, "user", "咨询下烫金机。")
+    # add_or_update_history(session_id, "assistant", "您好。请问是哪个型号")
+    # add_or_update_history(session_id, "user", "hak180")
+    # add_or_update_history(session_id, "assistant", "具体有什么问题呢？")
 
     # 初始化图状态
     init_state = {"session_id": "test_001", "original_query": "咋用？"}

@@ -12,7 +12,6 @@ from atguigu.config.prompt import (
 from atguigu.import_process.base import NodeBase
 from atguigu.import_process.state import ImportGraphState
 from atguigu.tool.get_bgem3 import get_embedding
-from atguigu.tool.json_format import json_format
 from atguigu.tool.milvus_client import get_milvus_client
 
 
@@ -121,12 +120,6 @@ class NodeItemNameRecognition(NodeBase):
         milvus_client.insert(collection_name=collection_name, data=data)
         for chunk in chunks_list:
             chunk["item_name"] = item_name
-        with open(
-            r"D:\Software\SGG\资料\视频分发\掌柜智库01\资料\05-设备手册汇总\doc\hak180产品安全手册\chunks_item_name.json",
-            "w",
-            encoding="utf-8",
-        ) as f:
-            f.write(json_format(chunks_list))
         return {
             "chunks": chunks_list,
             "item_name": item_name,

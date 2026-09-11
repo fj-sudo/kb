@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>我爱杨幂</h1>
+    <button id="btn" onclick="get()">点我发请求</button>
+    <div id="content">
+
+    </div>
+
+    <script>
+       async function get(){
+           const res=await fetch("http://localhost:8000/test?session_id=1")
+           const data= await res.json()
+           console.log(data)
+           const sse_obj=new EventSource("http://localhost:8000/sse?session_id=1")
+           sse_obj.onmessage=function (data){
+               if (data.data==="None"){
+                   sse_obj.close()
+               }
+               else{
+                   document.getElementById("content").innerHTML+=data.data +"<br/>"
+               }
+           }
+       }
+
+
+
+
+
+    </script>
+
+</body>
+</html>

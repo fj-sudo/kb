@@ -9,6 +9,7 @@ class QueryGraphState(TypedDict):
     包含整个查询流程中传递的所有数据。
     """
 
+    task_id: str
     session_id: str  # 会话ID
     message_id: str  # 消息ID
 

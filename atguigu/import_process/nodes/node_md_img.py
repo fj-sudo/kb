@@ -197,7 +197,7 @@ class NodeMDImg(NodeBase):
             md_content = f.read()
         image_dir = md_path_obj.parent / "images"
         image_dir_obj = Path(image_dir)
-        return image_dir, image_dir_obj, md_content  # pyright: ignore[reportReturnType]
+        return image_dir, image_dir_obj, md_content
 
 
 if __name__ == "__main__":

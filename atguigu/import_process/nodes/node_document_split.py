@@ -6,7 +6,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from atguigu.import_process.base import NodeBase
 from atguigu.import_process.state import ImportGraphState
-from atguigu.tool.json_format import json_format
 
 
 class NodeDocumentSplit(NodeBase):
@@ -112,13 +111,7 @@ class NodeDocumentSplit(NodeBase):
                         "md_content": title + "\n\n" + md_chunk_content,
                     }
                 )
-        with open(
-            r"D:\Software\SGG\资料\视频分发\掌柜"
-            r"智库01\资料\05-设备手册汇总\doc\hak180产品安全手册\chunks.json",
-            "w",
-            encoding="utf-8",
-        ) as f:
-            f.write(json_format(second_chunk_dick_list))
+
         return {"chunks": second_chunk_dick_list}
 
         # 传入切分器切分存part,md_content

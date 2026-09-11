@@ -4,7 +4,6 @@ import json
 from atguigu.import_process.base import NodeBase
 from atguigu.import_process.state import ImportGraphState
 from atguigu.tool.get_bgem3 import get_embedding
-from atguigu.tool.json_format import json_format
 
 
 class NodeBGEEmbedding(NodeBase):
@@ -29,12 +28,6 @@ class NodeBGEEmbedding(NodeBase):
             for index, chunk in enumerate(chunks_3_list):
                 chunk["dense_vector"] = embedding_dict["dense"][index]
                 chunk["sparse_vector"] = embedding_dict["sparse"][index]
-        with open(
-            r"D:\Software\SGG\资料\视频分发\掌柜智库01\资料\05-设备手册汇总\doc\hak180产品安全手册\chunks_embeding.json",
-            "w",
-            encoding="utf-8",
-        ) as f:
-            f.write(json_format(chunks_list))
         return {"chunks": chunks_list}
 
 
